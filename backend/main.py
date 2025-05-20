@@ -7,6 +7,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+# Import the Prometheus instrumentator
+from prometheus_fastapi_instrumentator import Instrumentator
+
 import models
 from db import SessionLocal
 
@@ -35,6 +38,11 @@ async def log_requests(request: Request, call_next):
     
     response = await call_next(request)
     return response
+
+# Add Prometheus instrumentation
+@app.on_event("startup")
+async def startup():
+    Instrumentator().instrument(app).expose(app)
 
 class Contact(BaseModel):
     """Contact model"""
