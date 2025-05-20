@@ -8,7 +8,7 @@ metadata:
     kubernetes.io/ingress.class: "gce"
 spec:
   rules:
-  - host: api.cs436-reactfastcontacts.com  # Replace with your domain
+  - host: api.ataagri.com
     http:
       paths:
       - path: /
