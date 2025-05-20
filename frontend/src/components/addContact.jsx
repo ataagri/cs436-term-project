@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { useAuth } from './auth/AuthContext';
 import { PlusIcon, XIcon } from '@heroicons/react/outline';
 import AllContacts from './allContacts';
 
 export default function AddContact(props) {
   let [isOpen, setIsOpen] = useState(false);
+  const { currentUser } = useAuth();
 
   // states for form
   let [firstName, setFirstName] = useState('');
@@ -17,9 +19,27 @@ export default function AddContact(props) {
   let handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      let response = await fetch('http://localhost:8000/create-contact', {
+      // Get the token from the current user
+      const getIdToken = async () => {
+        if (!currentUser) return null;
+        try {
+          return await currentUser.getIdToken();
+        } catch (error) {
+          console.error('Error getting token:', error);
+          return null;
+        }
+      };
+      
+      const token = await getIdToken();
+      const headers = { 
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      };
+      
+      console.log('Submitting contact to:', `${process.env.REACT_APP_API_URL}/create-contact`);
+      let response = await fetch(`${process.env.REACT_APP_API_URL}/create-contact`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           first_name: firstName,
           last_name: lastName,

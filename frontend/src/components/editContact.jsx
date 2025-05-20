@@ -1,6 +1,9 @@
 import { useState } from 'react';
+import { useAuth } from './auth/AuthContext';
 
 export default function EditContact(props) {
+  const { currentUser } = useAuth();
+  
   // states for form
   let [firstName, setFirstName] = useState(props.firstname);
   let [lastName, setLastName] = useState(props.lastname);
@@ -13,11 +16,18 @@ export default function EditContact(props) {
   let handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Get the token from the current user
+      let headers = { 'Content-Type': 'application/json' };
+      if (currentUser) {
+        const token = await currentUser.getIdToken();
+        headers.Authorization = `Bearer ${token}`;
+      }
+      
       let response = await fetch(
-        `http://localhost:8000/update-contact/${props.contactId}`,
+        `${process.env.REACT_APP_API_URL}/update-contact/${props.contactId}`,
         {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify({
             first_name: firstName,
             last_name: lastName,

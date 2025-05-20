@@ -1,16 +1,28 @@
 """ database creation """
+import sqlalchemy.exc
 from db import Base, SessionLocal, engine
 from models import Contact
 
-print("creating database...")
+print("Creating database tables...")
+try:
+    Base.metadata.create_all(engine)
+    print("Tables created successfully")
+except Exception as e:
+    print(f"Error creating tables: {e}")
+    exit(1)
 
-Base.metadata.create_all(engine)
-
-
+print("Adding sample contacts...")
 db = SessionLocal()
 
-db.add_all(
-    [
+try:
+    # Check if we already have contacts to avoid duplicates
+    existing_contacts = db.query(Contact).count()
+    if existing_contacts > 0:
+        print(f"Database already has {existing_contacts} contacts. Skipping sample data creation.")
+        db.close()
+        exit(0)
+        
+    sample_contacts = [
         Contact(
             first_name="Bilbo",
             last_name="Baggins",
@@ -102,7 +114,15 @@ db.add_all(
             notes="some note blah blah blah",
         ),
     ]
-)
-
-db.commit()
-db.close()
+    
+    db.add_all(sample_contacts)
+    db.commit()
+    print(f"Added {len(sample_contacts)} sample contacts to the database")
+except sqlalchemy.exc.SQLAlchemyError as e:
+    db.rollback()
+    print(f"Database error: {e}")
+except Exception as e:
+    print(f"Error adding sample data: {e}")
+finally:
+    db.close()
+    print("Database connection closed")

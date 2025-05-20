@@ -1,0 +1,7 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: contacts-certificate
+spec:
+  domains:
+  - api.cs436-reactfastcontacts.com

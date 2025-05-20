@@ -6,16 +6,20 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 # PostgreSQL connection string
 DB_USER = os.environ.get("DB_USER", "contacts-user")
 DB_PASSWORD = os.environ.get("DB_PASSWORD", "AtaIdilSarp123")
-DB_HOST = os.environ.get("DB_HOST", "/cloudsql/cs436-reactfastcontacts:us-central1:contacts-db")
 DB_NAME = os.environ.get("DB_NAME", "contacts")
 
 # For local development with Cloud SQL proxy
-CLOUD_SQL_PROXY = os.environ.get("CLOUD_SQL_PROXY", False)
+CLOUD_SQL_PROXY = os.environ.get("CLOUD_SQL_PROXY", "False").lower() in ("true", "1", "t")
 if CLOUD_SQL_PROXY:
-    POSTGRES_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@127.0.0.1:5432/{DB_NAME}"
+    DB_HOST = os.environ.get("DB_HOST", "localhost")
+    DB_PORT = os.environ.get("DB_PORT", "5432")
+    POSTGRES_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    print(f"Using local proxy connection: {POSTGRES_URL}")
 else:
-    # For production deployment
-    POSTGRES_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
+    # For production deployment with Cloud SQL Unix socket
+    DB_HOST = os.environ.get("DB_HOST", "/cloudsql/cs436-reactfastcontacts:us-central1:contacts-db")
+    POSTGRES_URL = f"postgresql:///{DB_NAME}?user={DB_USER}&password={DB_PASSWORD}&host={DB_HOST}"
+    print(f"Using Unix socket connection with host: {DB_HOST}")
 
 engine = create_engine(POSTGRES_URL)
 

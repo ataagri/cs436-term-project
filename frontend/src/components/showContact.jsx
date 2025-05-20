@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useAuth } from './auth/AuthContext';
 
 import EditContact from './editContact';
 
@@ -6,12 +7,28 @@ export default function ShowContact(props) {
   let [isOpen, setIsOpen] = useState(false);
   let [contact, setContact] = useState({});
   let [edit, setEdit] = useState(false);
+  const { currentUser } = useAuth();
 
   // delete contact from api then reloads the page
-  function deleteContact() {
-    fetch(`http://localhost:8000/delete-contact/${props.contactId}`, {
-      method: 'DELETE',
-    }).catch((err) => console.log(err));
+  async function deleteContact() {
+    try {
+      // Get the token from the current user
+      if (currentUser) {
+        const token = await currentUser.getIdToken();
+        await fetch(`${process.env.REACT_APP_API_URL}/delete-contact/${props.contactId}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+      } else {
+        await fetch(`${process.env.REACT_APP_API_URL}/delete-contact/${props.contactId}`, {
+          method: 'DELETE',
+        });
+      }
+    } catch (err) {
+      console.log(err);
+    }
 
     setIsOpen(false);
     window.location.reload(true);
@@ -20,12 +37,27 @@ export default function ShowContact(props) {
   // get contact from api by contact id
   useEffect(() => {
     async function fetchContact() {
-      await fetch(`http://localhost:8000/get-contact/${props.contactId}`)
-        .then((response) => response.json())
-        .then((data) => {
+      try {
+        // Get the token from the current user
+        let headers = {};
+        if (currentUser) {
+          const token = await currentUser.getIdToken();
+          headers = { Authorization: `Bearer ${token}` };
+        }
+        
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/get-contact/${props.contactId}`, {
+          headers
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
           setContact(data);
-        })
-        .catch((err) => console.log(err));
+        } else {
+          console.error('Failed to fetch contact:', response.status);
+        }
+      } catch (err) {
+        console.log(err);
+      }
     }
 
     if (props.open) {

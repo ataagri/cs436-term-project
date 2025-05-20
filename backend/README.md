@@ -1,115 +1,65 @@
-# The Back End
+# Backend Service for Contact Management App
 
-![FastAPI](https://img.shields.io/badge/fastapi-009688.svg?&style=for-the-badge&logo=fastapi&logoColor=white)
-![SQLite](https://img.shields.io/badge/sqlite-003B57.svg?&style=for-the-badge&logo=sqlite&logoColor=white)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg?style=for-the-badge)](https://github.com/psf/black)
+This is the backend service for the React Fast Contacts application. It provides a REST API for managing contacts.
 
-An CRUD contact API built on Fast API with a SQLite database using SQLAlchemy.
+## Local Development
 
-## Run Locally 💻
+### Setup
 
-Go to the project directory
+1. Install dependencies:
+   ```bash
+   pipenv install
+   ```
 
-```bash
-> contact_fastapi/backend
-```
+2. Start the local development server:
+   ```bash
+   ./run_local.sh
+   ```
 
-Install dependencies
+3. The API will be available at http://localhost:8000
 
-```bash
-> pipenv install
-```
+## Cloud Deployment
 
-Start the virtual enviroment
+### Building and Pushing the Docker Image
 
-```bash
-> pipenv shell
-```
+The application is deployed to Google Kubernetes Engine (GKE). Due to architecture differences between development machines (possibly ARM64) and GKE clusters (AMD64), you need to build a platform-specific Docker image.
 
-Create the databse
-
-This will give you an sqlite database consisting of 10 enteries
+To build and push the correct image:
 
 ```bash
-> python create_db.py
+./build_and_push.sh
 ```
 
-Start the server
+This script:
+1. Builds a Docker image targeting the AMD64 platform using Dockerfile.platform
+2. Pushes the image to Google Container Registry
+3. Provides instructions for updating the deployment
+
+### Updating the Deployment
+
+After pushing a new image, update the deployment:
 
 ```bash
-> uvicorn main:app --reload
+kubectl rollout restart deployment contacts-backend
 ```
 
-This will start the server so you can test the API at `localhost:8000`
+## Environment Variables
 
-## Documentation 📚
+The service uses the following environment variables:
 
-Documentation will be located at `localhost:8000/redocs` once the server is up and running. But for when it's not here is a breif overview.
+- `DB_USER`: Database username (from Kubernetes secret)
+- `DB_PASSWORD`: Database password (from Kubernetes secret)
+- `DB_NAME`: Database name (default: contacts)
+- `DB_HOST`: Cloud SQL instance connection name or host
 
-### CREATE :unicorn:
+## API Endpoints
 
-The `CREATE` endpoint will allow you to send JSON creating a new contact
+- `GET /contacts`: List all contacts
+- `GET /contacts/{id}`: Get a specific contact
+- `POST /contacts`: Create a new contact
+- `PUT /contacts/{id}`: Update a contact
+- `DELETE /contacts/{id}`: Delete a contact
 
-```bash
-localhost:8000/create-contact
-```
+## Architecture Notes
 
-Sending `JSON` in the message body like so below will create a new conact:
-
-```json
-{
-  "first_name": "Frank",
-  "last_name": "Flintstone",
-  "company": "Slate Rock and Gravel Company",
-  "tel": "210-555-1212",
-  "email": "frank.flintstone@srgc.com",
-  "address": "1 Yabba-Dabba-Doo, Bedrock, TX 12345"
-}
-```
-
-### READ 🤓
-
-There are two `READ` endpoints they are:
-
-```bash
-localhost:8000/all-contacts
-```
-
-This will return all the current contacts within the database
-
-```bash
-localhost:8000/get-contact/{contact_id}
-```
-
-This will return a contact by its `ID`
-
-### UPDATE ⤴️
-
-The `UPDATE` endpoint is similar to the create endpoint. This allows you to change contact information by `contact_id`
-
-```bash
-localhost:8000/update-contact/{contact_id}
-```
-
-```json
-{
-  "first_name": "Wilma",
-  "last_name": "Flintstone",
-  "company": "NULL",
-  "tel": "210-555-6969",
-  "email": "Wilma.flintstone@gmail.com",
-  "address": "1 Yabba-Dabba-Doo, Bedrock, TX 12345"
-}
-```
-
-### DELETE ❎
-
-The `DELETE` endpoint allows you to delete a contact entry via it's ID
-
-```bash
-localhost:8000/delete-contact/{contact_id}
-```
-
-## Acknowledgements
-
-- [Create A REST API with FastAPI, SQLAlchemy](https://youtu.be/2g1ZjA6zHRo)
+The service connects to a Cloud SQL PostgreSQL database using the Cloud SQL Proxy sidecar container in Kubernetes. This provides a secure connection to the database without exposing it to the public internet.
