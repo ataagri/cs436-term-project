@@ -24,7 +24,7 @@ export default function EditContact(props) {
       }
       
       let response = await fetch(
-        `${process.env.REACT_APP_API_URL}/update-contact/${props.contactId}`,
+        `${process.env.REACT_APP_API_URL}/contacts/${props.contactId}`,
         {
           method: 'PATCH',
           headers,

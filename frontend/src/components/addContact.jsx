@@ -36,8 +36,8 @@ export default function AddContact(props) {
         ...(token ? { Authorization: `Bearer ${token}` } : {})
       };
       
-      console.log('Submitting contact to:', `${process.env.REACT_APP_API_URL}/create-contact`);
-      let response = await fetch(`${process.env.REACT_APP_API_URL}/create-contact`, {
+      console.log('Submitting contact to:', `${process.env.REACT_APP_API_URL}/contacts`);
+      let response = await fetch(`${process.env.REACT_APP_API_URL}/contacts`, {
         method: 'POST',
         headers,
         body: JSON.stringify({

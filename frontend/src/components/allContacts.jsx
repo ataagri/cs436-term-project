@@ -27,7 +27,7 @@ export default function AllContacts() {
         const token = await getIdToken();
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/all-contacts`, {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/contacts`, {
           headers
         });
         

@@ -65,7 +65,12 @@ def read_root():
     """Root endpoint for health check"""
     return {"status": "OK", "message": "Contact API is running"}
 
-@app.get("/all-contacts", response_model=List[Contact], status_code=status.HTTP_200_OK)
+@app.get("/health", status_code=status.HTTP_200_OK)
+def health_check():
+    """Health check endpoint"""
+    return {"status": "healthy", "message": "API is operational"}
+
+@app.get("/contacts", response_model=List[Contact], status_code=status.HTTP_200_OK)
 def get_all_contacts(db: Session = Depends(get_db)):
     """READ: Get all contacts"""
     logger.info("Getting all contacts")
@@ -81,7 +86,7 @@ def get_all_contacts(db: Session = Depends(get_db)):
         )
 
 @app.get(
-    "/get-contact/{contact_id}", response_model=Contact, status_code=status.HTTP_200_OK
+    "/contacts/{contact_id}", response_model=Contact, status_code=status.HTTP_200_OK
 )
 def get_contact(contact_id: int, db: Session = Depends(get_db)):
     """READ: Get a contact by id"""
@@ -94,7 +99,7 @@ def get_contact(contact_id: int, db: Session = Depends(get_db)):
     return contact
 
 @app.post(
-    "/create-contact", response_model=Contact, status_code=status.HTTP_201_CREATED
+    "/contacts", response_model=Contact, status_code=status.HTTP_201_CREATED
 )
 def create_contact(contact: Contact, db: Session = Depends(get_db)):
     """CREATE: Create a new contact"""
@@ -138,7 +143,7 @@ def create_contact(contact: Contact, db: Session = Depends(get_db)):
         )
 
 @app.patch(
-    "/update-contact/{contact_id}",
+    "/contacts/{contact_id}",
     response_model=Contact,
     status_code=status.HTTP_200_OK,
 )
@@ -174,7 +179,7 @@ def update_contact(contact_id: int, contact: Contact, db: Session = Depends(get_
             detail=f"Database error: {str(e)}"
         )
 
-@app.delete("/delete-contact/{contact_id}")
+@app.delete("/contacts/{contact_id}")
 def delete_contact(contact_id: int, db: Session = Depends(get_db)):
     """DELETE: Delete a contact"""
     logger.info(f"Deleting contact with id: {contact_id}")

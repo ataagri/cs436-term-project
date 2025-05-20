@@ -15,14 +15,14 @@ export default function ShowContact(props) {
       // Get the token from the current user
       if (currentUser) {
         const token = await currentUser.getIdToken();
-        await fetch(`${process.env.REACT_APP_API_URL}/delete-contact/${props.contactId}`, {
+        await fetch(`${process.env.REACT_APP_API_URL}/contacts/${props.contactId}`, {
           method: 'DELETE',
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
       } else {
-        await fetch(`${process.env.REACT_APP_API_URL}/delete-contact/${props.contactId}`, {
+        await fetch(`${process.env.REACT_APP_API_URL}/contacts/${props.contactId}`, {
           method: 'DELETE',
         });
       }
@@ -45,7 +45,7 @@ export default function ShowContact(props) {
           headers = { Authorization: `Bearer ${token}` };
         }
         
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/get-contact/${props.contactId}`, {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/contacts/${props.contactId}`, {
           headers
         });
         
