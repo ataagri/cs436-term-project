@@ -20,9 +20,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI()
 
 # Add Prometheus instrumentation
-@app.on_event("startup")
-async def startup():
-    Instrumentator().instrument(app).expose(app)
+Instrumentator().instrument(app).expose(app)
 
 # allows cross-origin requests from any origin for development
 app.add_middleware(
