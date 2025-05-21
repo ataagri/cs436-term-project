@@ -5,10 +5,10 @@ name = "pypi"
 
 [packages]
 fastapi = {extras = ["all"], version = "*"}
-prometheus-fastapi-instrumentator = "*"
 requests = "*"
 sqlalchemy = "*"
 psycopg2-binary = "*"
+prometheus-fastapi-instrumentator = "*"
 
 [dev-packages]
 
