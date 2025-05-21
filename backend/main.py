@@ -19,6 +19,11 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
+# Add Prometheus instrumentation
+@app.on_event("startup")
+async def startup():
+    Instrumentator().instrument(app).expose(app)
+
 # allows cross-origin requests from any origin for development
 app.add_middleware(
     CORSMiddleware,
@@ -38,11 +43,6 @@ async def log_requests(request: Request, call_next):
     
     response = await call_next(request)
     return response
-
-# Add Prometheus instrumentation
-@app.on_event("startup")
-async def startup():
-    Instrumentator().instrument(app).expose(app)
 
 class Contact(BaseModel):
     """Contact model"""
