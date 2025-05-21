@@ -5,7 +5,7 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 # PostgreSQL connection string
 DB_USER = os.environ.get("DB_USER", "contacts-user")
-DB_PASSWORD = os.environ.get("DB_PASSWORD", "AtaIdilSarp123")
+DB_PASSWORD = os.environ.get("DB_PASSWORD", "localpassword")
 DB_NAME = os.environ.get("DB_NAME", "contacts")
 
 # For local development with Cloud SQL proxy
