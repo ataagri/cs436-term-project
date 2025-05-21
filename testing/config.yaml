@@ -1,0 +1,10 @@
+# Locust configuration file
+locustfile: locustfile.py
+headless: false
+users: 100
+spawn-rate: 10
+run-time: 10m
+host: https://api.ataagri.com
+# If you need to add headers for all requests (e.g., for authentication)
+# headers:
+#   Authorization: Bearer YOUR_TOKEN_HERE
