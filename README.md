@@ -28,15 +28,8 @@ The application is currently deployed and accessible at:
 - [Architecture](#architecture)
 - [Technology Stack](#technology-stack)
 - [Project Structure](#project-structure)
-- [Setup and Installation](#setup-and-installation)
-  - [Prerequisites](#prerequisites)
-  - [Quick Start with Docker](#quick-start-with-docker-recommended)
-  - [Manual Setup](#manual-setup-alternative)
-  - [Cloud SQL Proxy Setup](#cloud-sql-proxy-setup-for-gcp-development)
-  - [Monitoring Setup](#monitoring-setup)
 - [Google Cloud Deployment](#google-cloud-deployment)
 - [API Documentation](#api-documentation)
-- [Troubleshooting](#troubleshooting)
 - [Contact](#contact)
 
 ## Overview
@@ -64,12 +57,6 @@ The application demonstrates best practices for cloud-native development, includ
 - **Load Balancing**: Even distribution of traffic
 - **Managed Database**: Cloud SQL for PostgreSQL
 - **Monitoring**: Prometheus and Grafana dashboards
-
-### Developer Experience
-- **Local Development**: Easy setup for local development with Docker Compose
-- **Containerization**: Docker support for consistent environments
-- **Detailed Documentation**: Comprehensive setup and troubleshooting guides
-- **Monitoring**: Built-in Prometheus and Grafana for local development
 
 ## Architecture
 
@@ -145,7 +132,6 @@ The application follows a modern cloud-native architecture with three primary la
 │   │   ├── firebase.js       # Firebase configuration
 │   │   └── index.js          # Application entry point
 │   ├── package.json          # NPM package configuration
-│   ├── Dockerfile.dev        # Docker configuration for development
 │   └── tailwind.config.js    # Tailwind CSS configuration
 ├── backend/                  # FastAPI backend application
 │   ├── main.py               # FastAPI application entry point
@@ -164,184 +150,8 @@ The application follows a modern cloud-native architecture with three primary la
 │   ├── certificate.yaml      # SSL certificate configuration
 │   ├── db-credentials.yaml   # Database credentials configuration
 │   └── autoscale.yaml        # HPA configuration
-├── prometheus/               # Prometheus configuration
-│   └── prometheus.yml        # Prometheus configuration file
-├── grafana/                  # Grafana configuration
-│   └── provisioning/         # Grafana provisioning
-│       ├── datasources/      # Prometheus datasource configuration
-│       └── dashboards/       # Dashboard configurations
-├── docker-compose.yml        # Docker Compose configuration for local development
-├── setup.sh                  # Setup script for local development
 └── README.md                 # Project documentation
 ```
-
-## Setup and Installation
-
-### Prerequisites
-
-- Docker and Docker Compose (for the easiest setup)
-- Alternatively:
-  - Node.js (v16 or later)
-  - Python (v3.9 or later)
-  - PostgreSQL (v13 or later)
-  - Firebase account (for authentication)
-  - Google Cloud SDK (for deployment)
-  - kubectl (for Kubernetes deployment)
-
-### Quick Start with Docker (Recommended)
-
-The easiest way to get started is using Docker Compose, which sets up the entire application stack including:
-- PostgreSQL database
-- FastAPI backend
-- React frontend
-- Prometheus monitoring
-- Grafana dashboards
-
-1. Run the setup script:
-   ```bash
-   ./setup.sh
-   ```
-
-2. Access the application:
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:8000
-   - API Documentation: http://localhost:8000/docs
-   - Prometheus: http://localhost:9090
-   - Grafana: http://localhost:3001 (login: admin/password)
-
-3. To stop the application:
-   ```bash
-   docker-compose down
-   ```
-
-### Manual Setup (Alternative)
-
-If you prefer to set up each component individually, follow these steps:
-
-#### Frontend Setup
-
-1. Navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
-
-2. Create a `.env.local` file from the example:
-   ```bash
-   cp .env.local.example .env.local
-   ```
-
-3. Edit `.env.local` with your settings:
-   ```
-   REACT_APP_API_URL=http://localhost:8000
-   REACT_APP_USE_AUTH=false  # Set to true if using Firebase auth
-   ```
-
-4. If using authentication, set up Firebase:
-   - Create a project at https://console.firebase.google.com/
-   - Enable Authentication with Email/Password provider
-   - Add your Firebase configuration to `.env.local`
-
-5. Install dependencies and start the development server:
-   ```bash
-   npm install
-   npm start
-   ```
-
-6. The frontend will be available at `http://localhost:3000`
-
-#### Database Setup
-
-1. Install and start PostgreSQL or use Docker:
-   ```bash
-   docker run --name contacts-db \
-     -e POSTGRES_PASSWORD=localpassword \
-     -e POSTGRES_USER=contacts-user \
-     -e POSTGRES_DB=contacts \
-     -p 5432:5432 \
-     -d postgres:13
-   ```
-
-#### Backend Setup
-
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
-
-2. Install dependencies using Pipenv:
-   ```bash
-   pip install pipenv
-   pipenv install
-   ```
-
-3. Set up environment variables for local development:
-   ```bash
-   export DB_USER=contacts-user
-   export DB_PASSWORD=localpassword
-   export DB_NAME=contacts
-   export DB_HOST=localhost
-   export DB_PORT=5432
-   export CLOUD_SQL_PROXY=false
-   ```
-
-4. Initialize the database:
-   ```bash
-   pipenv run python create_db.py
-   ```
-
-5. Start the development server:
-   ```bash
-   pipenv run uvicorn main:app --reload
-   ```
-
-6. The API will be available at `http://localhost:8000`
-
-### Cloud SQL Proxy Setup (For GCP Development)
-
-If you want to connect to a Cloud SQL instance for development:
-
-1. Download the Cloud SQL Proxy:
-   ```bash
-   # For macOS
-   curl -o cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.0.0/cloud-sql-proxy.darwin.amd64
-   chmod +x cloud-sql-proxy
-   
-   # For Linux
-   curl -o cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.0.0/cloud-sql-proxy.linux.amd64
-   chmod +x cloud-sql-proxy
-   
-   # For Windows (using PowerShell)
-   Invoke-WebRequest -Uri "https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.0.0/cloud-sql-proxy.windows.amd64.exe" -OutFile "cloud-sql-proxy.exe"
-   ```
-
-2. Authenticate with Google Cloud:
-   ```bash
-   gcloud auth login
-   gcloud config set project YOUR_PROJECT_ID
-   ```
-
-3. Start the Cloud SQL Proxy:
-   ```bash
-   ./cloud-sql-proxy --instances=YOUR_PROJECT_ID:REGION:INSTANCE_NAME=tcp:5432
-   ```
-
-4. Configure the backend to use the proxy:
-   ```bash
-   export DB_USER=your_cloud_sql_user
-   export DB_PASSWORD=your_cloud_sql_password
-   export DB_NAME=contacts
-   export DB_HOST=localhost
-   export DB_PORT=5432
-   export CLOUD_SQL_PROXY=true
-   ```
-
-### Monitoring Setup
-
-The Docker Compose setup includes Prometheus and Grafana for monitoring. If you're setting up manually:
-
-1. Install Prometheus and configure it to scrape the `/metrics` endpoint of the backend
-2. Install Grafana and configure it to use Prometheus as a data source
-3. Import dashboards for FastAPI monitoring
 
 ## Google Cloud Deployment
 
@@ -490,6 +300,7 @@ The application is designed to be deployed to Google Cloud Platform using a prod
 
 4. Build and deploy to Firebase Hosting:
    ```bash
+   npm install
    npm run build
    firebase deploy --only hosting
    ```
@@ -507,64 +318,34 @@ The application is designed to be deployed to Google Cloud Platform using a prod
    firebase deploy --only functions
    ```
 
-### Monitoring Setup
+### Cloud SQL Proxy Setup
 
-1. Set up a VM for Prometheus and Grafana:
-   ```bash
-   gcloud compute instances create monitoring-vm \
-     --zone=us-central1-a \
-     --machine-type=e2-medium \
-     --image-family=debian-10 \
-     --image-project=debian-cloud
-   ```
+For connecting to your Cloud SQL instance:
 
-2. SSH into the VM and install Docker:
+1. Download the Cloud SQL Proxy:
    ```bash
-   gcloud compute ssh monitoring-vm --zone=us-central1-a
+   # For macOS
+   curl -o cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.0.0/cloud-sql-proxy.darwin.amd64
+   chmod +x cloud-sql-proxy
    
-   # Install Docker and Docker Compose
-   sudo apt-get update
-   sudo apt-get install -y docker.io docker-compose
-   sudo usermod -aG docker $USER
+   # For Linux
+   curl -o cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.0.0/cloud-sql-proxy.linux.amd64
+   chmod +x cloud-sql-proxy
+   
+   # For Windows (using PowerShell)
+   Invoke-WebRequest -Uri "https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.0.0/cloud-sql-proxy.windows.amd64.exe" -OutFile "cloud-sql-proxy.exe"
    ```
 
-3. Create monitoring configuration files similar to the local setup
-
-4. Start the monitoring stack:
+2. Authenticate with Google Cloud:
    ```bash
-   docker-compose up -d
+   gcloud auth login
+   gcloud config set project YOUR_PROJECT_ID
    ```
 
-5. Configure firewall rules to access Grafana:
+3. Start the Cloud SQL Proxy:
    ```bash
-   gcloud compute firewall-rules create allow-grafana \
-     --allow tcp:3000 \
-     --target-tags=monitoring-vm \
-     --description="Allow Grafana web interface"
+   ./cloud-sql-proxy --instances=YOUR_PROJECT_ID:REGION:INSTANCE_NAME=tcp:5432
    ```
-
-#### Metrics Endpoint
-
-The application provides a Prometheus-compatible metrics endpoint at `/metrics` that exposes:
-
-- HTTP request counts, durations, and sizes by handler and method
-- Python garbage collection statistics
-- Process information (memory usage, CPU time, etc.)
-
-These metrics can be scraped by Prometheus and visualized in Grafana dashboards to monitor:
-
-- API performance and latency
-- Request volume and patterns
-- Resource utilization
-- Error rates
-
-Example metrics available:
-```
-http_requests_total - Total number of HTTP requests
-http_request_duration_seconds - Request latency
-process_resident_memory_bytes - Memory usage
-process_cpu_seconds_total - CPU usage
-```
 
 ## API Documentation
 
@@ -573,10 +354,6 @@ The FastAPI backend provides automatic API documentation. You can access:
 - **Live API Documentation**:
   - Swagger UI: [https://api.ataagri.com/docs](https://api.ataagri.com/docs)
   - ReDoc: [https://api.ataagri.com/redoc](https://api.ataagri.com/redoc)
-
-- **Local Development Documentation**:
-  - Swagger UI: `http://localhost:8000/docs`
-  - ReDoc: `http://localhost:8000/redoc`
 
 ### Endpoints
 
@@ -613,82 +390,3 @@ Project Link: [https://github.com/ataagri/cs436-term-project](https://github.com
 ---
 
 Built with ❤️ using React, FastAPI, and Google Cloud Platform.
-## Troubleshooting
-
-### Common Issues and Solutions
-
-#### Docker Setup Issues
-
-1. **Port conflicts**:
-   - Error: `port is already allocated`
-   - Solution: Check if another application is using the required ports (3000, 8000, 5432, 9090, 3001). Stop those applications or change the ports in `docker-compose.yml`.
-
-2. **Docker permission issues**:
-   - Error: `permission denied` when running Docker commands
-   - Solution: Add your user to the Docker group: `sudo usermod -aG docker $USER` and then log out and back in.
-
-3. **Docker Compose not found**:
-   - Error: `docker-compose: command not found`
-   - Solution: Install Docker Compose separately or use the plugin version with `docker compose` (note the space instead of hyphen).
-
-#### Database Connection Issues
-
-1. **Cannot connect to PostgreSQL**:
-   - Error: `could not connect to server: Connection refused`
-   - Solution: Ensure PostgreSQL is running and check the connection parameters (host, port, username, password).
-
-2. **Cloud SQL Proxy connection issues**:
-   - Error: `failed to connect to instance`
-   - Solution: Verify your GCP credentials, project ID, and instance name. Ensure you have the necessary permissions.
-
-#### Frontend Issues
-
-1. **Firebase configuration errors**:
-   - Error: `Firebase App named '[DEFAULT]' already exists`
-   - Solution: Ensure you're not initializing Firebase multiple times in your code.
-
-2. **API connection errors**:
-   - Error: `Network Error` when calling the API
-   - Solution: Check that the backend is running and that `REACT_APP_API_URL` is set correctly in your `.env.local` file.
-
-3. **Authentication issues**:
-   - Error: `auth/invalid-api-key` or similar Firebase auth errors
-   - Solution: Verify your Firebase configuration in `.env.local` and ensure all required values are set correctly.
-
-#### Backend Issues
-
-1. **Database migration errors**:
-   - Error: `sqlalchemy.exc.OperationalError` when running `create_db.py`
-   - Solution: Check database connection parameters and ensure the database exists.
-
-2. **Environment variable issues**:
-   - Error: Missing environment variables
-   - Solution: Ensure all required environment variables are set or use the default values provided in the code.
-
-### Verification Steps
-
-To verify your setup is working correctly:
-
-1. **Database Connection**:
-   ```bash
-   # Using Docker
-   docker exec -it contacts-db psql -U contacts-user -d contacts -c "SELECT 1"
-   
-   # Using psql client
-   psql -h localhost -U contacts-user -d contacts -c "SELECT 1"
-   ```
-
-2. **Backend API**:
-   ```bash
-   curl http://localhost:8000/health
-   ```
-
-3. **Frontend Connection to Backend**:
-   - Open the browser console in the frontend application
-   - Check for network requests to the backend API
-   - Verify no CORS or connection errors
-
-4. **Monitoring**:
-   - Access Prometheus at http://localhost:9090
-   - Go to Status > Targets to verify the backend is being scraped
-   - Access Grafana at http://localhost:3001 and verify the Prometheus data source is connected
