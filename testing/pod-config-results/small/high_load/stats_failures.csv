@@ -1,0 +1,2 @@
+Method,Name,Error,Occurrences
+POST,/contacts,HTTPError('502 Server Error: Bad Gateway for url: /contacts'),2

@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: contacts-backend-latest
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: contacts-backend
+  template:
+    metadata:
+      labels:
+        app: contacts-backend
+      annotations:
+        kubernetes.io/change-cause: "Forced update to fix architecture issues"
+        prometheus.io/scrape: "true"
+        prometheus.io/scrape: "8000"
+        prometheus.io/scrape: "/metrics"
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
+      containers:
+      - name: contacts-backend
+        image: gcr.io/cs436-reactfastcontacts/contacts-backend:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: cloudsql-db-credentials
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cloudsql-db-credentials
+              key: password
+        - name: DB_NAME
+          value: contacts
+        - name: DB_HOST
+          value: /cloudsql/cs436-reactfastcontacts:us-central1:contacts-db
+        volumeMounts:
+        - name: cloudsql
+          mountPath: /cloudsql
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+      - name: cloudsql-proxy
+        image: gcr.io/cloudsql-docker/gce-proxy:1.31.0
+        command:
+          - "/cloud_sql_proxy"
+          - "-instances=cs436-reactfastcontacts:us-central1:contacts-db"
+          - "-dir=/cloudsql"
+        securityContext:
+          runAsNonRoot: true
+        volumeMounts:
+          - name: cloudsql
+            mountPath: /cloudsql
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            cpu: 1000m
+            memory: 2Gi
+      volumes:
+      - name: cloudsql
+        emptyDir: {}

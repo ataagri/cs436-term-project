@@ -1,16 +1,6 @@
 #!/bin/bash
 
-# Script to run Locust tests with different configurations
-
-# Make sure the script is executable
-# chmod +x run_test.sh
-
-# Install Locust if not already installed
-echo "Checking if Locust is installed..."
-if ! command -v locust &> /dev/null; then
-    echo "Installing Locust..."
-    pip install locust
-fi
+# Script to run Locust tests for pod configuration testing
 
 # Function to run a test with specific parameters
 run_test() {
@@ -43,19 +33,13 @@ mkdir -p results
 # Run a series of tests with increasing load
 echo "Starting load testing sequence..."
 
-# Test 1: Baseline - Low load
-run_test 10 2 2m "baseline"
+# Test 1: Low load
+run_test 20 5 2m "low_load"
 
 # Test 2: Medium load
-run_test 50 5 5m "medium_load"
+run_test 100 10 5m "medium_load"
 
-# Test 3: High load - should trigger autoscaling
-run_test 200 10 10m "high_load"
-
-# Test 4: Spike test - rapid increase in users
-run_test 300 50 5m "spike_test"
-
-# Test 5: Endurance test - moderate load for longer period
-run_test 100 10 15m "endurance_test"
+# Test 3: High load - should test resource limits
+run_test 300 20 5m "high_load"
 
 echo "All tests completed. Check the 'results' directory for detailed reports."
